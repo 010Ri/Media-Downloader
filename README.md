@@ -1,4 +1,7 @@
 # Media Downloader
+- yt-dlp
+- FastAPI
+- Cloudflare Tunnel
 
 ## Structure
 ```
