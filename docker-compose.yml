@@ -1,0 +1,22 @@
+services:
+  downloader:
+    build: ./downloader
+    container_name: downloader
+    volumes:
+      - /home/ubuntu/media:/media
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - app_net
+  
+  downloader_cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: downloader_cloudflared
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
+    networks:
+      - app_net
+
+networks:
+  app_net:
