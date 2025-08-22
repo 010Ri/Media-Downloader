@@ -6,6 +6,9 @@ services:
       - /home/ubuntu/media:/media
     ports:
       - "8000:8000"
+    environment:
+      - DOWNLOADER_USER=${DOWNLOADER_USER}
+      - DOWNLOADER_PASSWORD=${DOWNLOADER_PASSWORD}
     restart: unless-stopped
     networks:
       - app_net
