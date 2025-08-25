@@ -1,10 +1,27 @@
 services:
-  downloader:
+  web:
     build: .
-    container_name: downloader
+    container_name: downloader_web
     ports:
       - "5000:5000"
     volumes:
       - /mnt/media/music:/music
       - ./cookies.txt:/app/cookies.txt
-    restart: unless-stopped
+    depends_on:
+      - redis
+
+  worker:
+    build: .
+    container_name: downloader_worker
+    command: celery -A tasks.celery_app worker --loglevel=info
+    volumes:
+      - /mnt/media/music:/music
+      - ./cookies.txt:/app/cookies.txt
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+    container_name: downloader_redis
+    ports:
+      - "6380:6379"
