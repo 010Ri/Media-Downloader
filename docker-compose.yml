@@ -5,8 +5,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - /mnt/media/music:/music
-      - ./cookies.txt:/app/cookies.txt
+      - /mnt/media/video:/video
     depends_on:
       - redis
 
@@ -15,7 +14,7 @@ services:
     container_name: downloader_worker
     command: celery -A tasks.celery_app worker --loglevel=info
     volumes:
-      - /mnt/media/music:/music
+      - /mnt/media/video:/video
       - ./cookies.txt:/app/cookies.txt
     depends_on:
       - redis
