@@ -4,13 +4,14 @@ import os
 import re
 import json
 import time
+from threading import Thread
 
 app = Flask(__name__)
 DOWNLOAD_FOLDER = "/music"  # Docker外部ストレージにマウント
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-# ダウンロード進捗を格納するグローバル変数（単一ユーザー想定）
-progress_data = {"percent": "0%"}
+# 単一ユーザー想定の進捗データ
+progress_data = {"percent": "0%", "filename": ""}
 
 
 def sanitize_filename(filename: str) -> str:
@@ -26,6 +27,25 @@ def progress_hook(d):
         progress_data['percent'] = '100%'
 
 
+def download_thread(url):
+    """バックグラウンドでダウンロードする関数"""
+    progress_data['percent'] = "0%"
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": os.path.join(DOWNLOAD_FOLDER, sanitize_filename("%(title)s.%(ext)s")),
+        "postprocessors": [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "m4a",
+            "preferredquality": "192",
+        }],
+        "cookiefile": "/app/cookies.txt",
+        "progress_hooks": [progress_hook],
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=True)
+        progress_data['filename'] = sanitize_filename(f"{info['title']}.m4a")
+
+
 HTML_FORM = """
 <!doctype html>
 <title>YouTube音楽ダウンロード</title>
@@ -39,9 +59,7 @@ HTML_FORM = """
   <div id="progress-bar" style="width:0%; background:green; color:white; text-align:center;">0%</div>
 </div>
 
-{% if filename %}
-<p>ダウンロード完了: <a href="/download/{{ filename }}">{{ filename }}</a></p>
-{% endif %}
+<div id="download-link" style="margin-top:10px;"></div>
 
 <script>
 const evtSource = new EventSource("/progress");
@@ -52,6 +70,10 @@ evtSource.onmessage = function(event) {
     bar.style.width = data.percent;
     bar.textContent = data.percent;
   }
+  if (data.percent === "100%" && data.filename) {
+    const linkDiv = document.getElementById("download-link");
+    linkDiv.innerHTML = `<p>ダウンロード完了: <a href="/download/${data.filename}">${data.filename}</a></p>`;
+  }
 };
 </script>
 """
@@ -59,28 +81,12 @@ evtSource.onmessage = function(event) {
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    filename = None
     if request.method == "POST":
         url = request.form.get("url")
         if url:
-            # リセット進捗
-            progress_data['percent'] = "0%"
-
-            ydl_opts = {
-                "format": "bestaudio/best",
-                "outtmpl": os.path.join(DOWNLOAD_FOLDER, sanitize_filename("%(title)s.%(ext)s")),
-                "postprocessors": [{
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "m4a",
-                    "preferredquality": "192",
-                }],
-                "cookiefile": "/app/cookies.txt",
-                "progress_hooks": [progress_hook],
-            }
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=True)
-                filename = sanitize_filename(f"{info['title']}.m4a")
-    return render_template_string(HTML_FORM, filename=filename)
+            # バックグラウンドでダウンロード開始
+            Thread(target=download_thread, args=(url,), daemon=True).start()
+    return render_template_string(HTML_FORM)
 
 
 @app.route("/download/<filename>")
