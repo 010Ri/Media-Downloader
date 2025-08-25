@@ -1,15 +1,20 @@
 # Media Downloader
 - yt-dlp
-- FastAPI
-- Cloudflare Tunnel
+- Flask
+- Celery
+- Redis
 
 ## Structure
 ```
 /
-|--.env
-|--docker-compose.yml
-|--downloader
-|  |--Dockerfile
-|  |--app
-|  |  |--main.py
+media-downloader/
+├── app/
+│   ├── app.py
+│   ├── tasks.py
+│   ├── requirements.txt
+│   └── templates/
+│       └── index.html
+├── Dockerfile
+└── docker-compose.yml
+
 ```
