@@ -1,25 +1,10 @@
 services:
   downloader:
-    build: ./downloader
+    build: .
     container_name: downloader
-    volumes:
-      - /home/ubuntu/media:/media
     ports:
-      - "8000:8000"
-    environment:
-      - DOWNLOADER_USER=${DOWNLOADER_USER}
-      - DOWNLOADER_PASSWORD=${DOWNLOADER_PASSWORD}
+      - "5000:5000"
+    volumes:
+      - /mnt/media/music:/music
+      - ./cookies.txt:/app/cookies.txt
     restart: unless-stopped
-    networks:
-      - app_net
-  
-  downloader_cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: downloader_cloudflared
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
-    restart: unless-stopped
-    networks:
-      - app_net
-
-networks:
-  app_net:
