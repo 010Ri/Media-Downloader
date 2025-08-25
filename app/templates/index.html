@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>YouTube 音楽ダウンロード</title>
+    <title>YouTube 動画ダウンロード</title>
     <script>
         async function startDownload() {
             const urls = document.getElementById('urls').value.split("\n").map(u => u.trim()).filter(u => u);
@@ -41,7 +41,7 @@
 </head>
 
 <body>
-    <h2>YouTube URLを複数入力してください（改行区切り）</h2>
+    <h2>YouTube 動画のURLを複数入力してください（改行区切り）</h2>
     <textarea id="urls" rows="6" cols="60"></textarea><br>
     <button onclick="startDownload()">一括ダウンロード</button>
 
