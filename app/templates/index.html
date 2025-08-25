@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>YouTube 音楽ダウンロード</title>
+    <script>
+        async function startDownload() {
+            const urls = document.getElementById('urls').value.split("\n").map(u => u.trim()).filter(u => u);
+            for (let url of urls) {
+                const res = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+                const data = await res.json();
+                const taskId = data.task_id;
+                const li = document.createElement('li');
+                li.id = taskId;
+                li.innerText = `ダウンロード中: ${url} 0%`;
+                document.getElementById('tasks').appendChild(li);
+                checkProgress(taskId, li, url);
+            }
+        }
+
+        async function checkProgress(taskId, li, url) {
+            const res = await fetch(`/status/${taskId}`);
+            const data = await res.json();
+            if (data.state === 'PROGRESS') {
+                li.innerText = `ダウンロード中: ${url} ${data.percent}%`;
+                setTimeout(() => checkProgress(taskId, li, url), 1000);
+            } else if (data.state === 'SUCCESS') {
+                li.innerHTML = `完了: <a href="/download/${data.filename}">${data.filename}</a>`;
+            } else if (data.state === 'PENDING') {
+                li.innerText = `待機中: ${url}`;
+                setTimeout(() => checkProgress(taskId, li, url), 1000);
+            } else {
+                li.innerText = `失敗: ${url}`;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h2>YouTube URLを複数入力してください（改行区切り）</h2>
+    <textarea id="urls" rows="6" cols="60"></textarea><br>
+    <button onclick="startDownload()">一括ダウンロード</button>
+
+    <h3>タスク一覧</h3>
+    <ul id="tasks"></ul>
+</body>
+
+</html>
