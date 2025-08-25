@@ -13,7 +13,6 @@
 
 ## File Structure
 ```
-/
 media-downloader/
 ├── app/
 │   ├── app.py
