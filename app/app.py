@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify, render_template
-from tasks import download_youtube
+from flask import Flask, request, jsonify, render_template, send_from_directory
+from tasks import download_youtube, celery_app
 
 app = Flask(__name__)
 
@@ -16,7 +16,6 @@ def start_download():
 
 @app.route("/status/<task_id>")
 def status(task_id):
-    from tasks import celery_app
     task = celery_app.AsyncResult(task_id)
     if task.state == 'PROGRESS':
         meta = task.info
@@ -28,8 +27,7 @@ def status(task_id):
 
 @app.route("/download/<filename>")
 def download_file(filename):
-    from flask import send_from_directory
-    return send_from_directory("/music", filename, as_attachment=True)
+    return send_from_directory("/video", filename, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
