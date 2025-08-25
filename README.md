@@ -1,9 +1,9 @@
 # Media Downloader
-`yt-dlp`を使ってYouTube動画を`m4a`として保存
+`yt-dlp`を使ってYouTube動画を`mp4`として保存
 
 `http://localhost:5000/`にアクセスしてURLを指定 → ダウンロード
 
-ダウンロードした曲は`music/曲.m4a`という形で保存されます。
+ダウンロードした動画は`video/動画名のハッシュ.m4a`という形で保存されます。
 
 ## Techs used
 - yt-dlp
