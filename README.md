@@ -1,6 +1,8 @@
 # Media Downloader
 `yt-dlp`を使ってYouTube動画を`m4a`として保存
+
 `http://localhost:5000/`にアクセスしてURLを指定 → ダウンロード
+
 ダウンロードした曲は`music/曲.m4a`という形で保存されます。
 
 ## Techs used
@@ -25,4 +27,5 @@ media-downloader/
 
 ## `cookies.txt`
 YouTubeの`cookie`を入れてください。
+
 [Get cookies.txt LOCALLY](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)というChrome拡張機能があります。
